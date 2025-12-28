@@ -1,0 +1,28 @@
+{
+  "port": 3001,
+  "backends": [
+    {
+      "id": 0,
+      "url":"<link to reviewer instance>",
+      "owner": "<reviewer email>",
+      "weight": 1
+    },
+    {
+      "id": 1,
+      "url": "<link to reviewer instance>",
+      "owner": "<reviewer email>",
+      "weight": 1
+    }
+  ],
+  "health": {
+    "interval": 10000,
+    "timeout": 2000
+  },
+  "email": {
+    "service": "gmail",
+    "auth": {
+      "user": "<sendermail>@gmail.com",
+      "pass": "<app password>"
+    }
+  }
+}
