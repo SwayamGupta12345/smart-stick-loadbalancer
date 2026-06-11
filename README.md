@@ -1,16 +1,20 @@
 # Smart Stick Load Balancer
 
-A lightweight **sticky-session load balancer** for Node.js. It distributes requests to multiple backends, supports sticky sessions via cookies, performs health checks, and can optionally send email alerts.
+A lightweight sticky-session load balancer for Node.js with health checks, automatic failover, WebSocket support, and optional email alerts.
+
+Designed for developers who want a simple load-balancing solution directly inside the Node.js ecosystem without configuring external tools like Nginx or HAProxy.
 
 ---
 
 ## Features
 
-- Sticky sessions via cookies
-- Health checks with automatic failover
-- Optional email alerts
-- WebSocket and HTTP support
-- Minimal setup
+* Sticky sessions using cookies
+* Automatic backend health checks
+* Automatic failover for unhealthy servers
+* WebSocket and HTTP support
+* Optional email alerts
+* Simple configuration
+* Pure Node.js solution
 
 ---
 
@@ -22,7 +26,17 @@ npm install smart-stick-loadbalancer
 
 ---
 
-## Example Configuration (`config.json`)
+## Project Structure
+
+Create your own configuration file inside your project:
+
+```text
+my-project/
+├── config.json
+└── index.js
+```
+
+### config.json
 
 ```json
 {
@@ -41,74 +55,103 @@ npm install smart-stick-loadbalancer
       "weight": 1
     }
   ],
-  "health": { "interval": 10000, "timeout": 2000 },
+  "health": {
+    "interval": 10000,
+    "timeout": 2000
+  },
   "email": {
     "service": "gmail",
-    "auth": { "user": "<your-email@gmail.com>", "pass": "<your-app-password>" }
+    "auth": {
+      "user": "your-email@gmail.com",
+      "pass": "your-app-password"
+    }
   }
 }
 ```
 
----
-
-## Usage
+### index.js
 
 ```js
 const { createStickyProxy } = require("smart-stick-loadbalancer");
 const config = require("./config.json");
 
 const lb = createStickyProxy(config);
-lb.start(); // starts the load balancer
+
+lb.start();
 ```
 
-- Requests to `http://localhost:3001` will be forwarded to the backends.
-- Sticky sessions are automatically managed using cookies.
-- Health checks run periodically and remove unhealthy backends from rotation.
+---
+
+## How It Works
+
+1. Incoming requests arrive at the load balancer.
+2. A backend server is selected.
+3. The selected backend ID is stored in a cookie.
+4. Future requests from the same client are routed to the same backend.
+5. Health checks continuously monitor backend availability.
+6. Unhealthy backends are removed from rotation automatically.
 
 ---
 
 ## Quick Start Demo
 
-Create two simple backend servers:
+### Backend 1
 
-// server5000.js
-```
-const express = require('express');
+```js
+const express = require("express");
+
 const app = express();
-app.get('/', (req, res) => res.send('Hello from 5000'));
-app.listen(5000, () => console.log('Server 5000 running'));
+
+app.get("/", (req, res) => {
+  res.send("Hello from Server 5000");
+});
+
+app.listen(5000, () => {
+  console.log("Server 5000 running");
+});
 ```
 
-// server5001.js
-```
-const express = require('express');
+### Backend 2
+
+```js
+const express = require("express");
+
 const app = express();
-app.get('/', (req, res) => res.send('Hello from 5001'));
-app.listen(5001, () => console.log('Server 5001 running'));
+
+app.get("/", (req, res) => {
+  res.send("Hello from Server 5001");
+});
+
+app.listen(5001, () => {
+  console.log("Server 5001 running");
+});
 ```
 
-Start the load balancer:
+### Start the Load Balancer
 
-```
+```bash
 node index.js
 ```
 
-Open in browser: http://localhost:3001
-Requests should alternate between the two backends (sticky sessions maintained per client).
+Visit:
 
-Check health status:
+```text
+http://localhost:3001
+```
 
-```
-curl http://localhost:3001/_lb/health
-```
+The load balancer will distribute traffic between healthy backends while maintaining sticky sessions.
+
+---
 
 ## Health Endpoint
 
-```http
-GET /_lb/health
+Check backend status:
+
+```bash
+curl http://localhost:3001/_lb/health
 ```
 
-Response example:
+### Response Example
 
 ```json
 {
@@ -117,8 +160,18 @@ Response example:
   "healthy": 2,
   "unhealthy": 0,
   "backends": [
-    { "id": 0, "url": "http://localhost:5000", "healthy": true, "requests": 5 },
-    { "id": 1, "url": "http://localhost:5001", "healthy": true, "requests": 3 }
+    {
+      "id": 0,
+      "url": "http://localhost:5000",
+      "healthy": true,
+      "requests": 5
+    },
+    {
+      "id": 1,
+      "url": "http://localhost:5001",
+      "healthy": true,
+      "requests": 3
+    }
   ]
 }
 ```
@@ -127,10 +180,40 @@ Response example:
 
 ## Email Alerts
 
-- Alerts are sent when a backend goes down or comes back up.
-- Requires valid Gmail credentials (or any supported email service).
+Optional email notifications can be enabled through the configuration file.
+
+Alerts are sent when:
+
+* A backend server goes down
+* A backend server comes back online
+
+Supported through Nodemailer-compatible email services.
 
 ---
+
+## Use Cases
+
+* Learning how load balancers work
+* Local development environments
+* Internal tools
+* Small Node.js deployments
+* Prototyping multi-server architectures
+
+---
+
+## Notes
+
+* Backend IDs should be unique.
+* WebSockets are supported.
+* The `weight` field is reserved for future balancing strategies.
+* Health checks currently verify whether a backend responds successfully.
+
+---
+
+## License
+
+MIT
+
 
 ## License
 
