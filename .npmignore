@@ -1,5 +1,4 @@
-node_modules
-*.env
-*.log
-*.py
-*.lock.json
+src/config.json
+.gitignore
+.env
+.env.*
