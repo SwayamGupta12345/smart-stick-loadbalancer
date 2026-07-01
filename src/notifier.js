@@ -1,33 +1,48 @@
 const nodemailer = require("nodemailer");
 
-function createTransport(emailConfig) {
+const transporterCache = new WeakMap();
+
+function getTransporter(emailConfig) {
   if (!emailConfig) return null;
-  return nodemailer.createTransport({
+  if (transporterCache.has(emailConfig)) return transporterCache.get(emailConfig);
+
+  const transporter = nodemailer.createTransport({
     service: emailConfig.service,
     auth: emailConfig.auth,
   });
+
+  transporterCache.set(emailConfig, transporter);
+  return transporter;
 }
 
-function sendDownAlert(server, emailConfig) {
-  const transporter = createTransport(emailConfig);
-  if (!transporter) return;
-  transporter.sendMail({
-    from: emailConfig.auth.user,
-    to: server.owner,
-    subject: "⚠️ Backend Down",
-    text: `Your backend at ${server.url} is down.`,
-  });
+async function sendDownAlert(server, emailConfig) {
+  const transporter = getTransporter(emailConfig);
+  if (!transporter || !server.owner) return;
+  try {
+    await transporter.sendMail({
+      from: emailConfig.auth.user,
+      to: server.owner,
+      subject: "⚠️ Backend Down",
+      text: `Your backend at ${server.url} is down.\nTime: ${new Date().toISOString()}`,
+    });
+  } catch (err) {
+    console.error(`[smart-stick-loadbalancer] Failed to send down alert for ${server.url}:`, err.message);
+  }
 }
 
-function sendUpAlert(server, emailConfig) {
-  const transporter = createTransport(emailConfig);
-  if (!transporter) return;
-  transporter.sendMail({
-    from: emailConfig.auth.user,
-    to: server.owner,
-    subject: "✅ Backend Recovered",
-    text: `Your backend at ${server.url} is back online.`,
-  });
+async function sendUpAlert(server, emailConfig) {
+  const transporter = getTransporter(emailConfig);
+  if (!transporter || !server.owner) return;
+  try {
+    await transporter.sendMail({
+      from: emailConfig.auth.user,
+      to: server.owner,
+      subject: "✅ Backend Recovered",
+      text: `Your backend at ${server.url} is back online.\nTime: ${new Date().toISOString()}`,
+    });
+  } catch (err) {
+    console.error(`[smart-stick-loadbalancer] Failed to send up alert for ${server.url}:`, err.message);
+  }
 }
 
 module.exports = { sendDownAlert, sendUpAlert };

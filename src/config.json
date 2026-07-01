@@ -1,5 +1,6 @@
 {
   "port": 3001,
+  "strategy": "round-robin",
   "backends": [
     {
       "id": 0,
