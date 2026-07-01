@@ -93,7 +93,7 @@ The cookie stores the assigned backend's identifier and is automatically updated
 ---
 
 ## Installation
-
+ 
 ```bash
 npm install smart-stick-loadbalancer
 ```
