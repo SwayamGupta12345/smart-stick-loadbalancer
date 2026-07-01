@@ -71,11 +71,11 @@ directly inside your Node.js application with a simple JSON configuration.
 ## Architecture
 
 ```text
-                Client Requests
-                        │
-                        ▼
-             Smart Stick Load Balancer
-                        │
+                   Client Requests
+                         │
+                         ▼
+              Smart Stick Load Balancer
+                         │
            ┌─────────────┼─────────────┐
            │             │             │
            ▼             ▼             ▼
