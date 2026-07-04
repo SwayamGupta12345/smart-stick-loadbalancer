@@ -102,8 +102,6 @@ npm install smart-stick-loadbalancer
  - Node.js **18 or later**
  - npm
 
-The package relies on modern Node.js features such as the built-in `fetch()` API.
-
 ---
 
 ## Project Structure

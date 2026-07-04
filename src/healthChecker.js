@@ -29,7 +29,7 @@ async function checkHealth(server, globalConfig = {}) {
       method: cfg.method,
       url,
       timeout: cfg.timeout,
-      headers: cfg.headers,
+      headers: { ...cfg.headers, Connection: "close" },
       // Never throw on status — we inspect it ourselves
       validateStatus: () => true,
     });
